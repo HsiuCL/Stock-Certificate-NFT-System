@@ -1,0 +1,14 @@
+{% extends "templates/html_template.html" %}
+
+{% block content %}
+  <form method='POST'>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <br>
+    <input type='text' name='company_name' class="form-content" placeholder='Company Name' size="50" value="{{ company_name }}">
+    <br>
+    <input type='text' name='collection_url' class="form-content" placeholder='Collection URL' size="100">
+    <br>
+    <br>
+    <input type='submit' name='submit' class="submit-btn" value="Submit"/>
+  </form>
+{% endblock %}

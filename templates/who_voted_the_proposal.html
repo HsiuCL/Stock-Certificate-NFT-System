@@ -1,0 +1,10 @@
+{% extends "templates/html_template.html" %}
+
+{% block content %}
+<div style="padding: 30px;">
+  {% for v in voter %}
+  <p>{{ v }}</p>
+  <br>
+  {% endfor %}
+</div>
+{% endblock %}

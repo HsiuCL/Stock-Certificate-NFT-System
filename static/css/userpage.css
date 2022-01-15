@@ -1,0 +1,172 @@
+.content-box {
+  display: grid;
+  grid-template-columns: 200px auto;
+  height: calc(100vh - 110px);
+}
+
+.content-select-bar {
+  background-color: rgba(150, 150, 150, 0.5);
+  width: 200px;
+  height: calc(100vh - 110px);
+  display: grid;
+  grid-template-rows: 50px 50px 50px;
+  gap: 20px;
+}
+
+.selected-content {
+  width: calc(100vw - 200px);
+  height: calc(100vh - 110px);
+}
+
+.symbol {
+  height: 100px;
+  font-size: 2em;
+  text-align: center;
+  margin: 0;
+  padding-top: 20px;
+}
+
+.content-selector {
+  height: 50px;
+  width: 200px;
+  text-align: center;
+  border: none;
+  background-color: rgba(100, 100, 100, 0.7);
+  font-size: 1.5em;
+}
+
+.content-selector:hover {
+  background-color: rgba(50, 50, 50, 0.7);
+  cursor: pointer;
+}
+
+.blocker {
+  z-index: 999;
+  background-color: transparent;
+  width: 100vw;
+  height: calc(100vh - 60px);
+  position: absolute;
+  left: 0;
+  top: 60px;
+}
+
+.propose-btn {
+  position: absolute;
+  right: 20px;
+  top: 70px;
+  width: 100px;
+  height: 40px;
+  background-color: rgba(50, 50, 50, 0.7);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.propose-btn:hover {
+  background-color: rgba(50, 50, 50, 1);
+}
+
+.propose-icon {
+  color: white;
+  font-size: 1.8em;
+  margin-top: 7px;
+}
+
+.form-title {
+  font-size: 2em;
+  text-align: center;
+}
+
+.form-box {
+  background-color: rgba(170, 170, 170, 1);
+  text-align: center;
+  margin-left: 25%;
+  margin-top: calc((100vh - 110px)*0.1);
+  width: 50%;
+  height: 50%;
+  padding: 5%;
+  border-radius: 25px;
+}
+
+.proposal-box {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  overflow-y: scroll;
+  gap: 20px;
+  width: calc(100vw - 260px);
+  height: calc(100vh - 230px);
+  background-color: rgba(220, 220, 220, 0.9);
+  padding: 30px;
+}
+
+.proposal-manipulate-bar {
+  width: calc(100vw - 200px);
+  height: 60px;
+}
+
+.proposal-item {
+  width: 380px;
+  /* height: 400px; */
+  height: 700px;
+  display: grid;
+  grid-template-columns: 300px auto;
+  border-radius: 15px;
+}
+
+.voting {
+  background-color: rgba(130, 130, 130, 0.8);
+}
+
+.rejected {
+  background-color: rgba(130, 50, 50, 0.8);
+}
+
+.passed {
+  background-color: rgba(50, 130, 50, 0.8);
+}
+
+.issue {
+  /* height: 350px; */
+}
+
+.burn_one_issue_two {
+  /* height: 500px; */
+}
+
+.burn {
+  /* height: 300px; */
+}
+
+.vote-btn {
+  margin-top: 15px;
+  padding: 0;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+}
+
+.agree-checkbox {
+  color: rgba(0, 150, 0, 1);
+  font-size: 1.5em;
+}
+
+.disagree-checkbox {
+  color: rgba(150, 0, 0, 1);
+  font-size: 1.5em;
+}
+
+.proposal-content-box {
+  padding-left: 10px;
+}
+
+.form-vote-box {
+  display: grid;
+  grid-template-columns: 50% 50%;
+}
+
+.form-vote-content {
+  overflow: scroll;
+  height: calc((100vh - 110px)/2 - 60px);
+}

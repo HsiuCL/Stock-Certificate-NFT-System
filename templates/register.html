@@ -1,0 +1,53 @@
+{% extends "templates/html_template.html" %}
+
+{% block style %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}" />
+{% endblock %}
+
+{% block content %}
+  <div class="register-form">
+    <h3 class="title">
+      Register
+    </h3>
+    <form method='POST' onsubmit="return confirm('Are you sure you want to submit?')" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type='text' name='company_name' class="register-form-content" placeholder='Company Name' size="50" required="required">
+      <br>
+      <input type='text' name='company_symbol' class="register-form-content" placeholder='Company Symbol' size="50" required="required">
+      <br>
+      <input type='date' name='founding_date' class="register-form-content" placeholder='Founding Date' size="50" required="required">
+      <br>
+      <input type='text' name='original_number_of_shares' class="register-form-content" placeholder='Original Number Of Shares' pattern="\d*" size="50" required="required">
+      <br>
+      <input type='text' name='WEB3_INFURA_PROJECT_ID' class="register-form-content" placeholder='WEB3_INFURA_PROJECT_ID' size="50" required="required">
+      <br>
+      <input type="file" class="register-form-content" name="image" accept="image/*" required="required">
+
+      <br>
+      <br>
+      <div class="member">
+        <input type='text' name='member_name' class="register-form-content" placeholder='Member Name' size="50" required="required">
+        <input type='text' name='member_email' class="register-form-content" placeholder='Member Email' size="50" required="required">
+        <br>
+        <br>
+      </div>
+      <input type="button" id="add-member" name="add-member" value="Add Board Member" />
+      <br>
+      <br>
+      <input type='submit' name='submit' class="submit-btn" value="Submit"/>
+    </form>
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script>
+    jQuery(function($) {
+      var $button = $('#add-member'),
+        $row = $('.member').clone();
+
+      $button.click(function() {
+        $row.clone().insertBefore( $button );
+      });
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "templates/html_template.html" %}
+
+{% block style %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/mainpage.css') }}" />
+{% endblock %}
+
+{% block content %}
+<div class="mainpage-content">
+  <h3>
+    Cooperating Organizations
+  </h3>
+  <div id="users" class="users">
+    {% for user in users %}
+      <a class="user-link" href="/userpage?user_id={{ user['id'] }}">
+        <img class="user-image" src="{{ user['image'] }}">
+        <p style="display: none;">{{ user['name'] }}</p>
+      </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

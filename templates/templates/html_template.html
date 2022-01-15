@@ -1,0 +1,31 @@
+<html>
+
+<head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  {% block style %}
+  {% endblock %}
+</head>
+
+<body>
+  <section id="navbar">
+    <a class="navbar-item navbar-logo" href="/">SCS</a>
+  </section>
+
+  <div class="content-wrapper">
+    {% block content %}
+    {% endblock %}
+  </div>
+
+  <footer id="footer">
+    © Copyright 2022, NTU, HsiuChiehLee
+    <!-- <a href="https://www.citi.sinica.edu.tw/" target="_blank"> -->
+      <!-- <i class="fas fa-info-circle footer-icon"></i> -->
+    <!-- </a> -->
+  </footer>
+</body>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+{% block script %}
+{% endblock %}
+
+</html>

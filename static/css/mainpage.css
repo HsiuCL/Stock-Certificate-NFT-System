@@ -1,0 +1,35 @@
+.content-wrapper {
+  background: url("../image/mainpage_background.jpg");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+h3 {
+  font-size: 1.5em;
+  margin-top: 0;
+}
+
+.mainpage-content {
+  background-color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  margin: auto;
+  margin-top: calc((100vh - 110px)*0.1);
+  width: 50%;
+  height: 50%;
+  padding: 5%;
+  border-radius: 25px;
+}
+
+.users {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  overflow: scroll;
+  gap: 30px
+}
+
+.user-image {
+  max-width: 150px;
+  max-height: 150px;
+}

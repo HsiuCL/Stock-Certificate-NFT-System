@@ -1,0 +1,24 @@
+.content-wrapper {
+  background: url("../image/mainpage_background.jpg");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+.register-form {
+  background-color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  margin: auto;
+  margin-top: calc((100vh - 110px)*0.1);
+  width: 50%;
+  height: 50%;
+  padding: 5%;
+  border-radius: 25px;
+  overflow: scroll;
+}
+
+.title {
+  font-size: 2em;
+  margin: 0;
+  padding-bottom: 20px;
+}
