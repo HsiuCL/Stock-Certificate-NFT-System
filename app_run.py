@@ -17,7 +17,6 @@ from datetime import datetime as dt
 app = flask.Flask(__name__)
 app.config['DATABASE'] = 'static/datas/userdata.db'
 app.config['SECRET_KEY'] = os.urandom(24)
-app.config['SYSTEM_ADDRESS'] = '0x64FC16aeFe6d806c7527C3E22286856d63971A2C'
 
 
 csrf = CSRFProtect(app)
@@ -189,6 +188,7 @@ if __name__ == '__main__':
             if len(env) == 2:
                 env_name, env_value = env[0], env[1]
                 os.environ[env_name] = env_value
+    app.config['SYSTEM_ADDRESS'] = os.environ['SYSTEM_ADDRESS']
 
     app.run(host="0.0.0.0",
             port=int("8888"),
