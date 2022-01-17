@@ -1,7 +1,9 @@
 from brownie import Collectible, accounts, network, config
 
-def main(collection_name, collection_symbol):
+def main(collection_name, collection_symbol, member_account_str, min_signature, certificateTokenURI):
+    member_account = member_account_str.split('|')
+    min_signature = int(min_signature)
     dev = accounts.add(config['wallets']['from_key'])
     publish_source = False
-    collectible = Collectible.deploy(collection_name, collection_symbol, {"from": dev}, publish_source=publish_source)
+    collectible = Collectible.deploy(collection_name, collection_symbol, member_account, min_signature, certificateTokenURI, {"from": dev}, publish_source=publish_source)
     return collectible

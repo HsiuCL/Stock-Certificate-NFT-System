@@ -22,3 +22,26 @@
   margin: 0;
   padding-bottom: 20px;
 }
+
+.register-form-content {
+  height: 30px;
+  width: 360px;
+  margin-bottom: 5px;
+}
+
+.submit-btn {
+  width: 50px;
+  height: 30px;
+  padding: 0;
+}
+
+.slider-text-min {
+  font-size: 1.5em;
+  color: rgba(255, 50, 50, 1);
+  display: inline;
+}
+
+.slider-text-max {
+  display: inline;
+  font-size: 1.5em;
+}

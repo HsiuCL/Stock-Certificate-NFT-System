@@ -21,47 +21,10 @@
   </div>
 
   <div id="content-proposal" class="selected-content">
-    <div class="proposal-manipulate-bar">
-      manipulate bar
-    </div>
-    <div class="proposal-box">
-      {% for pps in proposal %}
-      <div id="proposal_{{ pps['id'] }}" class="proposal-item {{ pps['state'] }} {{ pps['operation'] }}">
-        <div class="proposal-content-box">
-          <h3 class="proposal-title">Proposal#{{ pps['id'] }}</h3>
-          <div id="proposal-content-{{ pps['id'] }}" class="proposal-content">
-            {% if pps['operation'] == 'issue' %}
-            <p>Operation : <br><b>Issue Certificate</b></p>
-            <p>Issue Amount : <br><b>{{ pps['issue_amount'] }}</b></p>
-            <p>Receiver : <br><b>{{ pps['receiver'] }}</b></p>
-            <img style="max-width: 100px; max-height: 100px;" src="{{ pps['image'] }}">
-            {% elif pps['operation'] == 'burn_one_issue_two' %}
-            <p>Operation : <br><b>Burn 1 Issue 2</b></p>
-            <p>Burn Id : <br><b>{{ pps['burn_id'] }}</b></br></b>
-            <p>Issue Amount 1 : <br><b>{{ pps['issue_amount_1'] }}</b></br></b>
-            <p>Receiver 1 : <br><b>{{ pps['receiver_1'] }}</b></br></b>
-            <img style="max-width: 100px; max-height: 100px;" src="{{ pps['image_1'] }}">
-            <p>Issue Amount 2 : <br><b>{{ pps['issue_amount_2'] }}</b></br></b>
-            <p>Receiver 2 : <br><b>{{ pps['receiver_2'] }}</b></br></b>
-            <img style="max-width: 100px; max-height: 100px;" src="{{ pps['image_2'] }}">
-            {% else %}
-            <p>Operation : <br><b>Burn</b></p>
-            <p>Burn Id : <br><b>{{ pps['burn_id'] }}</b></br></b>
-            {% endif %}
-            <p>Proposer : <br><b>{{ pps['proposer'] }}</b></p>
-            <a href="/who_voted_the_proposal?user_id={{ user_id }}&proposal_id={{ pps['id'] }}" target="_blank">Who Voted For This Proposal?</a>
-          </div>
-        </div>
-
-        <div class="proposal-agreement-box">
-          {% if pps['state'] == 'voting' %}
-          <button class="vote-btn" onclick="vote_for_proposal('{{ pps["id"] }}')">VOTE</button>
-          {% elif pps['state'] == 'rejected' %}
-          <p style="margin-top: 20px;">Rejecter : <br><b>{{ pps['rejecter'] }}</b></br><p>
-          {% endif %}
-        </div>
-      </div>
-      {% endfor %}
+    <!-- <div class="proposal-manipulate-bar"> -->
+      <!-- manipulate bar -->
+    <!-- </div> -->
+    <div id="proposal-box" class="proposal-box">
     </div>
     <button class="propose-btn" onclick="open_form('propose')">
       <p class="propose-icon">+Propose</p>
@@ -69,81 +32,68 @@
   </div>
 </div>
 
-<div id="form-blocker" class="blocker">
+<div id="form-blocker" class="blocker no-js">
   <div class="form-box">
     <form id="form-propose" class="form-propose form" onsubmit="return confirm('Are you sure you want to submit?')" method="POST" enctype="multipart/form-data">
-      <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}"/>
+      <input id="csrf_token" type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}"/>
       <h3 class="form-title">Propose An Operation</h3>
-      <input type="text" name="proposer" class="form-item" size="50" placeholder="Proposer Name">
-      <br>
-      <input type="password" name="key" class="form-item" size="50" placeholder="Your Key">
-      <br>
-      <br>
-      <select name="operation" class="propose-form-item" onchange='switch_propose_operation($(this).find(":selected").val())'>
+      <select id="operation" name="operation" class="propose-form-item need-ipfs" onchange='switch_propose_operation($(this).find(":selected").val())'>
         <option value="issue">Issue</option>
+        <option value="founding">Founding</option>
         <option value="burn_one_issue_two">Burn One Issue Two</option>
         <option value="burn">Burn</option>
       </select>
 
+      <div id="form-propose-founding" class="form-propose-operation">
+        <input id="founding-amount" type="text" name="founding_amount" class="propose-form-item need-ipfs" size="50" placeholder="Founding Amount" pattern="\d*">
+        <br>
+        <input id="founding-image" type="file" class="register-form-contenti propose-form-item need-ipfs" name="founding_image" accept="image/*" placeholder="Founding Image">
+        <br>
+        <p id="founding-ipfs-uri" class="ipfs-uri"></p>
+        <button type='button' name='set_ipfs' class="set-ipfs-btn" onclick="setIPFS()">Generate URI</button>
+      </div>
+
       <div id="form-propose-issue" class="form-propose-operation">
-        <input type="text" name="issue_amount" class="form-item" size="50" placeholder="Issue Amount" pattern="\d*">
+        <input id="issue-amount" type="text" name="issue_amount" class="propose-form-item need-ipfs" size="50" placeholder="Issue Amount" pattern="\d*">
         <br>
-        <input type="text" name="receiver" class="form-item" size="50" placeholder="Receiver Account (keep empty if to system)">
+        <input id="receiver" type="text" name="receiver" class="propose-form-item" size="50" placeholder="Receiver Account" pattern="^0x[a-fA-F0-9]{40}$">
         <br>
-        <input type="file" class="register-form-content" name="issue_image" accept="image/*" placeholder="Certificate Image">
+        <input id="issue-image" type="file" class="register-form-content propose-form-item need-ipfs" name="issue_image" accept="image/*" placeholder="Certificate Image">
+        <br>
+        <p id="issue-ipfs-uri" class="ipfs-uri"></p>
+        <button type='button' name='set_ipfs' class="set-ipfs-btn" onclick="setIPFS()">Generate URI</button>
       </div>
       
       <div id="form-propose-burn_one_issue_two" class="form-propose-operation">
-        <input type="text" name="b1i2_burn_id" class="form-item" size="50" placeholder="Certificate Id To Burn">
+        <input id="b1i2-burn-id" type="text" name="b1i2_burn_id" class="propose-form-item" size="50" placeholder="Certificate Id To Burn" pattern="\d*">
         <br>
         <br>
-        <input type="text" name="b1i2_issue_amount_1" class="form-item" size="50" placeholder="Issue Amount 1" pattern="\d*">
+        <input id="b1i2-issue-amount-1" type="text" name="b1i2_issue_amount_1" class="propose-form-item need-ipfs" size="50" placeholder="Issue Amount 1" pattern="\d*">
         <br>
-        <input type="text" name="b1i2_receiver_1" class="form-item" size="50" placeholder="Receiver Account 1 (keep empty if to system)">
+        <input id="b1i2-receiver-1" type="text" name="b1i2_receiver_1" class="propose-form-item" size="50" placeholder="Receiver Account 1" pattern="^0x[a-fA-F0-9]{40}$">
         <br>
-        <input type="file" class="register-form-content" name="b1i2_image_1" accept="image/*" placeholder="Certificate Image 1">
+        <input id="b1i2-image-1" type="file" class="register-form-content propose-form-item need-ipfs" name="b1i2_image_1" accept="image/*" placeholder="Certificate Image 1">
         <br>
+        <p id="burn-one-issue-two-ipfs-uri-1" class="ipfs-uri"></p>
         <br>
-        <input type="text" name="b1i2_issue_amount_2" class="form-item" size="50" placeholder="Issue Amount 2" pattern="\d*">
+        <input id="b1i2-issue-amount-2" type="text" name="b1i2_issue_amount_2" class="propose-form-item need-ipfs" size="50" placeholder="Issue Amount 2" pattern="\d*">
         <br>
-        <input type="text" name="b1i2_receiver_2" class="form-item" size="50" placeholder="Receiver Account 2 (keep empty if to system)">
+        <input id="b1i2-receiver-2" type="text" name="b1i2_receiver_2" class="propose-form-item" size="50" placeholder="Receiver Account 2" pattern="^0x[a-fA-F0-9]{40}$">
         <br>
-        <input type="file" class="register-form-content" name="b1i2_image_2" accept="image/*" placeholder="Certificate Image 2">
+        <input id="b1i2-image-2" type="file" class="register-form-content propose-form-item need-ipfs" name="b1i2_image_2" accept="image/*" placeholder="Certificate Image 2">
+        <br>
+        <p id="burn-one-issue-two-ipfs-uri-2" class="ipfs-uri"></p>
+        <button type='button' name='set_ipfs' class="set-ipfs-btn" onclick="setIPFS()">Generate URI</button>
       </div>
       
       <div id="form-propose-burn" class="form-propose-operation">
-        <input type="text" name="burn_id" class="form-item" size="50" placeholder="Burn Id">
+        <input id="burn-id" type="text" name="burn_id" class="propose-form-item" size="50" placeholder="Burn Id" pattern="\d*">
       </div>
 
       <br><br>
-      <input type='submit' name='form_name' class="submit-btn" value="propose"/>
+      <button id="set-proposal-btn" type='button' name='propose' class="submit-btn" onclick="setProposal()">Submit</button>
       <br><br>
       <button type="button" class="close-btn" onclick="close_form()">Close</button>
-    </form>
-
-    <form id="form-vote" class="form-vote form" onsubmit="return confirm('Are you sure you want to submit?')" method="POST">
-      <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}"/>
-      <input type="hidden" id="form-vote-proposal-id" name="proposal_id">
-      <div class="form-vote-box">
-        <div>
-          <h3 id="form-vote-title" class="form-title"></h3>
-          <br>
-          <div id="form-vote-content" class="form-vote-content"></div>
-          <br>
-        </div>
-        <div style="padding-top: 20%;">
-          <input type="text" name="voter" class="form-item" size="50" placeholder="Voter Name">
-          <br>
-          <input type="password" name="key" class="form-item" size="50" placeholder="Your Key">
-          <br><br>
-          <label class="agree-checkbox"><input type="radio" name="agreement" value="agree">Agree</label>
-          <label class="disagree-checkbox"><input type="radio" name="agreement" value="disagree">Disagree</label>
-          <br><br>
-          <input type='submit' name='form_name' class="submit-btn" value="vote"/>
-          <br><br>
-          <button type="button" class="close-btn" onclick="close_form()">Close</button>
-        </div>
-      </div>
     </form>
   </div>
 </div>
@@ -151,6 +101,28 @@
 
 {% block script %}
 <script>
+  $(function() {
+    $( ".need-ipfs" ).click(function() {
+        set_ipfs_btn();
+    });
+    $('.selected-content').hide();
+    $('#form-blocker').addClass("no-js");
+    set_ipfs_btn();
+    $('<input>').attr({'type': 'hidden', 'name': 'user_id', 'value': '{{ user_id }}'}).appendTo('form');
+    switch_content('{{ preselect_content }}');
+    switch_propose_operation('issue');
+  });
+
+  window.ethereum.on('accountsChanged', function (accounts) {
+    location.assign(location.origin + location.pathname + location.search + "&preselect_content=proposal" + location.hash);
+  })
+
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
+  var user_id = {{ user_id | tojson }};
+  user_id.toString();
+  var user_abi = {{ user_abi | tojson }};
+
   function switch_content(content_type) {
       $('.selected-content').hide();
       $('#content-' + content_type).show();
@@ -159,30 +131,224 @@
   function switch_propose_operation(operation_type) {
       $('.form-propose-operation').hide();
       $('#form-propose-' + operation_type).show();
+      if (operation_type == 'burn') {
+        $('#set-proposal-btn').prop('disabled', false);
+      } else {
+        set_ipfs_btn();
+      }
     }
 
   function open_form(form_name) {
       $('.form').hide();
       $('.form-' + form_name).show();
-      $('#form-blocker').show();
+      $('#form-blocker').removeClass("no-js");
     }
 
   function close_form() {
-      $('#form-blocker').hide();
+      set_ipfs_btn();
+      $('#form-blocker').addClass("no-js");
     }
 
-  function vote_for_proposal(proposal_id) {
-      $('#form-vote-title').text('Vote For Proposal#' + proposal_id);
-      var proposal_content = $('#proposal-content-' + proposal_id).html();
-      $('#form-vote-content').html(proposal_content);
-      $('#form-vote-proposal-id').val(proposal_id);
-      open_form('vote');
+  async function agree_for_proposal(proposal_id) {
+    const SCS_raw = new ethers.Contract(user_id, user_abi, signer);
+    let tx = await SCS_raw.signProposal(proposal_id);
+    console.log(tx);
+    location.assign(location.origin + location.pathname + location.search + "&preselect_content=proposal" + location.hash);
+  }
+
+  async function reject_for_proposal(proposal_id) {
+    const SCS_raw = new ethers.Contract(user_id, user_abi, signer);
+    let tx = await SCS_raw.rejectProposal(proposal_id);
+    console.log(tx);
+    location.assign(location.origin + location.pathname + location.search + "&preselect_content=proposal" + location.hash);
+  }
+
+  function set_ipfs_btn() {
+    if ($("#operation").find(":selected").val() != "burn") {
+      $('.ipfs-uri').hide();
+      $('.set-ipfs-btn').show();
+      $('#set-proposal-btn').prop('disabled', true);
     }
-  
-  $('.selected-content').hide();
-  $('#form-blocker').hide();
-  $('<input>').attr({'type': 'hidden', 'name': 'user_id', 'value': '{{ user_id }}'}).appendTo('form');
-  switch_content('{{ preselect_content }}');
-  switch_propose_operation('issue');
+  }
+
+  function setIPFS() {
+    if (confirm("Are You Sure You Want To Set IPFS For These Data?")) {
+      var proposal_type = $('#operation').find(":selected").val();
+      var csrf_token = $("#csrf_token").val();
+      let formData = new FormData($("#form-propose")[0]);
+
+      $.ajax({
+        "url": "/set_up_IPFS",
+        "type": "POST",
+        "headers": {
+          "X-CSRF-TOKEN": csrf_token
+          },
+        "data": formData,
+        "contentType": false,
+        "cache": false,
+        "processData": false,
+        }).done(function(data) {
+          $("#founding-ipfs-uri").text(data["uri_1"]);
+          $("#burn-one-issue-two-ipfs-uri-1").text(data["uri_1"]);
+          $("#issue-ipfs-uri").text(data["uri_1"]);
+          $("#burn-one-issue-two-ipfs-uri-2").text(data["uri_2"]);
+          $(".set-ipfs-btn").hide();
+          $(".ipfs-uri").show();
+          $("#set-proposal-btn").prop("disabled", false);
+        });
+    }
+  }
+
+  async function setProposal() {
+      if(confirm('Are You Sure You Want To Submit?')) {
+        var proposal_type = $('#operation').find(":selected").val();
+        var tx;
+
+        const SCS_raw = new ethers.Contract(user_id, user_abi, signer);
+
+        if (proposal_type == 'founding') {
+          var certificateTokenURI = $("#founding-ipfs-uri").text();
+          tx = await SCS_raw.foundingProposal(certificateTokenURI);
+          console.log(tx);
+        }
+        else if (proposal_type == 'issue') {
+          var receiver = $("#receiver").val();
+          var certificateTokenURI = $("#issue-ipfs-uri").text();
+          tx = await SCS_raw.issueProposal(receiver, certificateTokenURI);
+          console.log(tx);
+        } else if (proposal_type == 'burn_one_issue_two') {
+          var burn_id = $("#b1i2-burn-id").val();
+          var receiver_1 = $("#b1i2-receiver-1").val();
+          var certificateTokenURI_1 = $("#burn-one-issue-two-ipfs-uri-1").text();
+          var receiver_2 = $("#b1i2-receiver-2").val();
+          var certificateTokenURI_2= $("#burn-one-issue-two-ipfs-uri-2").text();
+          tx = await SCS_raw.burnOneIssueTwoProposal(burn_id, receiver_1, certificateTokenURI_1, receiver_2, certificateTokenURI_2);
+          console.log(tx);
+
+        } else if (proposal_type == 'burn') {
+          var burn_id = $("#burn-id").val();
+          tx = await SCS_raw.burnProposal(burn_id);
+          console.log(tx);
+        } else {
+          console.log('WTF');
+        }
+        location.assign(location.origin + location.pathname + location.search + "&preselect_content=proposal" + location.hash);
+      }
+    }
+
+  function getEvents() {
+    let web3 = new Web3(
+      new Web3.providers.WebsocketProvider("wss://rinkeby.infura.io/ws/v3/{{ WEB3_INFURA_PROJECT_ID }}")
+    );
+
+    const instance = new web3.eth.Contract(user_abi, user_id);
+
+    let curAccount;
+    provider.listAccounts().then(function(result) {
+        curAccount = result[0];
+      });
+
+    instance.getPastEvents(
+        "allEvents",
+        { fromBlock: 0, toBlock: "latest" },
+        (errors, events) => {
+            if (!errors) {
+                for (var i = 0; i < events.length; i++) {
+                  let event_name = events[i]["event"];
+                  let args = events[i]["returnValues"];
+                  if (event_name == "FoundingProposalCreated"
+                      || event_name == "IssueProposalCreated"
+                      || event_name == "BurnProposalCreated"
+                      || event_name == "BurnOneIssueTwoProposalCreated") {
+
+                    let cur_proposal = document.createElement("div");
+                    cur_proposal.setAttribute("id", "proposal-" + args["proposalIdx"]);
+                    cur_proposal.classList.add("proposal-item");
+                    cur_proposal.classList.add("voting");
+                    let cur_proposal_content_box = document.createElement("div");
+                    cur_proposal_content_box.classList.add("proposal-content-box");
+                    let cur_proposal_header_box = document.createElement("div");
+                    cur_proposal_header_box.classList.add("proposal-header-box");
+                    let cur_proposal_title = document.createElement("h3");
+                    $(cur_proposal_header_box).append(cur_proposal_title)
+                    cur_proposal_title.classList.add("proposal-title");
+                    cur_proposal_title.innerText = "Proposal#" + args["proposalIdx"];
+                    let cur_proposal_content = document.createElement("div");
+                    cur_proposal_content.classList.add("proposal-content");
+                    $(cur_proposal_content).append("<p>Proposer : <br><b>" +args["proposer"]+ "</b></p>");
+                    if (event_name == "FoundingProposalCreated") {
+                      fetch(args["certificateTokenURI"])
+                      .then(function(response) {
+                        return response.json();
+                      }).then(function(data) {
+                        res_attr = data["attributes"];
+                        $(cur_proposal_content).append("<p>Operation : <br><b>Founding</b></p>");
+                        $(cur_proposal_content).append("<p>Founding Amount : <br><b>" + res_attr[3]["value"] + "</b></p>");
+                        $(cur_proposal_content).append("<p>Certificate Name To Generate : <br><b>" + data["name"] + "</b></p>");
+                        $(cur_proposal_content).append("<img style='max-width: 100px; max-height: 100px;' src='" + data["image"] + "'>")
+                        $(cur_proposal_content).append("<p>Proposal Timestamp : <br><b>" + res_attr[2]["value"] + "</b></p>");
+                        });
+                    } else if (event_name == "IssueProposalCreated") {
+                      fetch(args["certificateTokenURI"])
+                       .then(function(response) {
+                        return response.json();
+                      }).then(function(data) {
+                        res_attr = data["attributes"];
+                        $(cur_proposal_content).append("<p>Operation : <br><b>Issue</b></p>");
+                        $(cur_proposal_content).append("<p>Issue Amount : <br><b>" + res_attr[3]["value"] + "</b></p>");
+                        $(cur_proposal_content).append("<p>Certificate Name To Generate : <br><b>" + data["name"] + "</b></p>");
+                        $(cur_proposal_content).append("<img style='max-width: 100px; max-height: 100px;' src='" + data["image"] + "'>")
+                        $(cur_proposal_content).append("<p>Proposal Timestamp : <br><b>" + res_attr[2]["value"] + "</b></p>");
+                      });
+                    } else if (event_name == "BurnOneIssueTwoProposalCreated") {
+                      $(cur_proposal_content).append("<p>Operation : <br><b>Burn One Issue Two</b></p>");
+                      $(cur_proposal_content).append("<p>Burn Id : <br><b>" + args["tokenId"]+ "</b></p>");
+                      fetch(args["certificateTokenURI_1"])
+                      .then(function(response) {
+                        return response.json();
+                      }).then(function(data) {
+                        res_attr = data["attributes"];
+                        $(cur_proposal_content).append("<p>Issue Amount 1 : <br><b>" + res_attr[3]["value"] + "</b></p>");
+                        $(cur_proposal_content).append("<p>Certificate Name To Generate 1 : <br><b>" + data["name"] + "</b></p>");
+                        $(cur_proposal_content).append("<img style='max-width: 100px; max-height: 100px;' src='" + data["image"] + "'>")
+                      });
+
+                      fetch(args["certificateTokenURI_2"])
+                      .then(function(response) {
+                        return response.json();
+                      }).then(function(data) {
+                        res_attr = data["attributes"];
+                        $(cur_proposal_content).append("<p>Issue Amount 2 : <br><b>" + res_attr[3]["value"] + "</b></p>");
+                        $(cur_proposal_content).append("<p>Certificate Name To Generate 2 : <br><b>" + data["name"] + "</b></p>");
+                        $(cur_proposal_content).append("<img style='max-width: 100px; max-height: 100px;' src='" + data["image"] + "'>")
+                        $(cur_proposal_content).append("<p>Proposal Timestamp : <br><b>" + res_attr[2]["value"] + "</b></p>");
+                      });
+                    } else if (event_name == "BurnProposalCreated") {
+                      $(cur_proposal_content).append("<p>Operation : <br><b>Burn</b></p>");
+                      $(cur_proposal_content).append("<p>Burn Id : <br><b>" + args["tokenId"]+ "</b></p>");
+                    }
+                    cur_proposal_content_box.append(cur_proposal_header_box);
+                    cur_proposal_content_box.append(cur_proposal_content);
+                    cur_proposal.append(cur_proposal_content_box);
+                    $(cur_proposal_header_box).append("<button id='reject-btn-" + args["proposalIdx"]+ "' class='reject-btn' onclick='reject_for_proposal(" + args["proposalIdx"]+ ")'>REJECT</button>");
+                    $(cur_proposal_header_box).append("<button id='agree-btn-" + args["proposalIdx"] + "' class='agree-btn' onclick='agree_for_proposal(" + args["proposalIdx"]+ ")'>AGREE</button>");
+                    $("#proposal-box").prepend(cur_proposal);
+                  } else if (event_name == "ProposalSigned" && curAccount == args["signer"]) {
+                    $("#agree-btn-" + args["proposalIdx"]).prop("disabled", true);
+                  } else if (event_name == "ProposalRejected" && curAccount == args["rejecter"]) {
+                    $("#reject-btn-" + args["proposalIdx"]).prop("disabled", true);
+                  } else if (event_name == "ProposalExecuted") {
+                    $("#proposal-" + args["proposalIdx"]).addClass("passed");
+                  } else if (event_name == "ProposalDeprecated") {
+                    $("#proposal-" + args["proposalIdx"]).addClass("rejected");
+                  }
+                }
+            } else {
+                console.log(errors);
+              }
+        }
+    );
+    } 
+  getEvents();
 </script>
 {% endblock %}

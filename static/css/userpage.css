@@ -67,9 +67,13 @@
   background-color: rgba(50, 50, 50, 1);
 }
 
+.no-js {
+  display: none;
+}
+
 .propose-icon {
   color: white;
-  font-size: 1.8em;
+  font-size: 1.6em;
   margin-top: 7px;
 }
 
@@ -81,12 +85,13 @@
 .form-box {
   background-color: rgba(170, 170, 170, 1);
   text-align: center;
-  margin-left: 25%;
+  margin-left: calc((100vw - 200px)*0.1 + 200px);
   margin-top: calc((100vh - 110px)*0.1);
-  width: 50%;
-  height: 50%;
+  width: calc((100vw - 200px)*0.7);
+  height: calc((100vh - 170px)*0.7);
   padding: 5%;
   border-radius: 25px;
+  overflow: scroll;
 }
 
 .proposal-box {
@@ -96,22 +101,23 @@
   overflow-y: scroll;
   gap: 20px;
   width: calc(100vw - 260px);
-  height: calc(100vh - 230px);
+  height: calc(100vh - 170px);
   background-color: rgba(220, 220, 220, 0.9);
   padding: 30px;
 }
 
-.proposal-manipulate-bar {
-  width: calc(100vw - 200px);
-  height: 60px;
-}
+/* .proposal-manipulate-bar { */
+  /* width: calc(100vw - 200px); */
+  /* height: 60px; */
+/* } */
 
 .proposal-item {
-  width: 380px;
+  width: 350px;
   /* height: 400px; */
+  overflow-wrap: break-word;
   height: 700px;
-  display: grid;
-  grid-template-columns: 300px auto;
+  padding: 15px;
+  /* padding-right: 30px; */
   border-radius: 15px;
 }
 
@@ -139,13 +145,56 @@
   /* height: 300px; */
 }
 
-.vote-btn {
+.agree-btn {
   margin-top: 15px;
   padding: 0;
   width: 60px;
   height: 60px;
   cursor: pointer;
+  background-color: rgba(50, 190, 50, 1);
+  border-radius: 10px;
+  display: inline;
+  border-width: 1px;
 }
+
+.agree-btn:hover {
+  background-color: rgba(50, 230, 50, 1);
+}
+
+.agree-btn:disabled {
+  background-color: rgba(50, 190, 60, 0.4);
+  cursor: auto;
+}
+
+.passed .proposal-content-box .proposal-header-box .agree-btn,
+.passed .proposal-content-box .proposal-header-box .reject-btn,
+.rejected .proposal-content-box .proposal-header-box .agree-btn,
+.rejected .proposal-content-box .proposal-header-box .reject-btn {
+  display: none;
+}
+
+.reject-btn {
+  display: inline;
+  margin-top: 15px;
+  padding: 0;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  background-color: rgba(190, 50, 50, 1);
+  border-radius: 10px;
+  border-width: 1px;
+}
+
+.reject-btn:hover {
+  background-color: rgba(230, 50, 50, 1);
+}
+
+.reject-btn:disabled {
+  background-color: rgba(190, 50, 50, 0.4);
+  cursor: auto;
+}
+
+
 
 .agree-checkbox {
   color: rgba(0, 150, 0, 1);
@@ -159,6 +208,7 @@
 
 .proposal-content-box {
   padding-left: 10px;
+  width: 100%;
 }
 
 .form-vote-box {
@@ -169,4 +219,31 @@
 .form-vote-content {
   overflow: scroll;
   height: calc((100vh - 110px)/2 - 60px);
+}
+
+.propose-form-item {
+  width: 300px;
+  height: 30px;
+  margin-bottom: 5px;
+}
+
+.submit-btn {
+  width: 60px;
+  height: 40px;
+  background-color: rgb(60, 200, 60);
+}
+
+.submit-btn:disabled {
+  background-color: gray;
+}
+
+.close-btn {
+  width: 60px;
+  height: 40px;
+}
+
+.proposal-header-box {
+  display: grid;
+  grid-template-columns: auto 75px 80px;
+  padding-right: 0;
 }

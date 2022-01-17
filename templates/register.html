@@ -1,6 +1,7 @@
 {% extends "templates/html_template.html" %}
 
 {% block style %}
+  <link href='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}" />
 {% endblock %}
 
@@ -11,27 +12,25 @@
     </h3>
     <form method='POST' onsubmit="return confirm('Are you sure you want to submit?')" enctype="multipart/form-data">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type='hidden' id="min-signature" name='min_signature' class="register-form-content" placeholder='Minimum Signature To Grant Certificate' pattern="\d*" size="50" required="required" value="1">
       <input type='text' name='company_name' class="register-form-content" placeholder='Company Name' size="50" required="required">
       <br>
       <input type='text' name='company_symbol' class="register-form-content" placeholder='Company Symbol' size="50" required="required">
       <br>
       <input type='date' name='founding_date' class="register-form-content" placeholder='Founding Date' size="50" required="required">
       <br>
-      <input type='text' name='original_number_of_shares' class="register-form-content" placeholder='Original Number Of Shares' pattern="\d*" size="50" required="required">
-      <br>
-      <input type='text' name='WEB3_INFURA_PROJECT_ID' class="register-form-content" placeholder='WEB3_INFURA_PROJECT_ID' size="50" required="required">
-      <br>
-      <input type="file" class="register-form-content" name="image" accept="image/*" required="required">
 
+      <input type="file" class="register-form-content" name="image" accept="image/*" required="required">
       <br>
       <br>
       <div class="member">
-        <input type='text' name='member_name' class="register-form-content" placeholder='Member Name' size="50" required="required">
-        <input type='text' name='member_email' class="register-form-content" placeholder='Member Email' size="50" required="required">
-        <br>
+        <input type='text' name='member_account' class="register-form-content" placeholder='Member Account' size="42" required="required" pattern="^0x[a-fA-F0-9]{40}$">
         <br>
       </div>
-      <input type="button" id="add-member" name="add-member" value="Add Board Member" />
+      <input type="button" id="add-member" name="add-member" value="+Add Board Member" />
+      <br><br>
+      <div id="slider" style="width: 300px; margin: auto;"></div>
+      <p id="slider-value"></p>
       <br>
       <br>
       <input type='submit' name='submit' class="submit-btn" value="Submit"/>
@@ -40,13 +39,31 @@
 {% endblock %}
 
 {% block script %}
+<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <script>
+    var slider_max = 1;
+    function register_slider() {
+      $("#slider").slider({
+        min: 1,
+        max: slider_max,
+        slide: function(e, ui) {
+          $("#slider-value").html("<p class='slider-text-min'>" + ui.value + "</p>  out of  <p class='slider-text-max'>" + slider_max + "</p><br>should sign for a proposal to validate it.");
+          $("#min-signature").val(ui.value);
+        }
+      });
+
+      $("#slider-value").html("<p class='slider-text-min'>" + $("#min-signature").val() + "</p>" + "  out of  <p class='slider-text-max'>" + slider_max + "</p><br>should sign for a proposal to validate it.");
+    }
+
     jQuery(function($) {
       var $button = $('#add-member'),
-        $row = $('.member').clone();
+      $row = $('.member').clone();
+      register_slider();
 
       $button.click(function() {
+        slider_max += 1;
         $row.clone().insertBefore( $button );
+        register_slider();
       });
     });
   </script>
