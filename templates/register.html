@@ -26,6 +26,8 @@
       <div class="member">
         <input type='text' name='member_account' class="register-form-content" placeholder='Member Account' size="42" required="required" pattern="^0x[a-fA-F0-9]{40}$">
         <br>
+        <input type='number' step='1' name='member_vote' class="register-form-content" placeholder="Member Governance Token" required='required'>
+        <br>
       </div>
       <input type="button" id="add-member" name="add-member" value="+Add Board Member" />
       <br><br>
@@ -41,18 +43,17 @@
 {% block script %}
 <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <script>
-    var slider_max = 1;
     function register_slider() {
       $("#slider").slider({
         min: 1,
-        max: slider_max,
+        max: 1000,
         slide: function(e, ui) {
-          $("#slider-value").html("<p class='slider-text-min'>" + ui.value + "</p>  out of  <p class='slider-text-max'>" + slider_max + "</p><br>should sign for a proposal to validate it.");
+          $("#slider-value").html("<p class='slider-text-min'>" + Math.round(ui.value/10) + "." + Math.round(ui.value%10) + "%</p> should sign for a proposal to validate it.");
           $("#min-signature").val(ui.value);
         }
       });
 
-      $("#slider-value").html("<p class='slider-text-min'>" + $("#min-signature").val() + "</p>" + "  out of  <p class='slider-text-max'>" + slider_max + "</p><br>should sign for a proposal to validate it.");
+      $("#slider-value").html("<p class='slider-text-min'>" + Math.round($('#min-signature').val()/10) + "." + Math.round($('#min-signature').val()%10) + "%</p> should sign for a proposal to validate it.");
     }
 
     jQuery(function($) {
@@ -61,9 +62,7 @@
       register_slider();
 
       $button.click(function() {
-        slider_max += 1;
         $row.clone().insertBefore( $button );
-        register_slider();
       });
     });
   </script>

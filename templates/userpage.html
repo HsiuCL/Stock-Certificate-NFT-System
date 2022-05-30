@@ -12,12 +12,22 @@
     <button class="content-selector" onclick="switch_content('proposal')">Proposal</button>
   </div>
 
-  <div id="content-collection" class="selected-content">
-    {% if user_data['collection_url'] == '0' %}
-    URL For This Organization Has Not Been Set Yet. Please Contact The Admin.
-    {% else %}
-    <iframe src={{ user_data['collection_url'] }} width="100%" height="100%" frameborder='0'></iframe>
-    {% endif %}
+  <div id="content-collection" class="selected-content collection-metadata-wrapper">
+    <div id="collection-metadata" class="collection-metadata">
+      <div class="collection-data user-vote-wrapper">
+        <div id="user-vote" class='user-vote'>
+        </div>
+        <button class="send-vote-btn" onclick="open_form('send-vote')">
+          <p class="send-vote-icon">Send Vote</p>
+        </button>
+      </div>
+      <div id="total-found" class="collection-data total-found">
+      </div>
+      <div id="total-issue" class="collection-data total-issue">
+      </div>
+    </div>
+    <div id="collection-box" class="collection-box">
+    </div>
   </div>
 
   <div id="content-proposal" class="selected-content">
@@ -34,6 +44,19 @@
 
 <div id="form-blocker" class="blocker no-js">
   <div class="form-box">
+    <form id="form-send-vote" class="form-send-vote form" onsubmit="return confirm('Are you sure you want to send token?')" method=>
+      <input id="csrf_token" type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}"/>
+      <input id="send-vote-receiver" type="text" class="send-vote-form-item" size="50" placeholder="Receiver Account" pattern="^0x[a-fA-F0-9]{40}$" required='required'>
+      <br>
+      <input id="send-vote-amount" type='number' step='1' name='member_vote' class="send-vote-form-item" placeholder="Member Governance Token" required='required' min="1">
+      <br>
+      <br>
+      <button id="send-vote-submit-btn" type='button' name='propose' class="submit-btn" onclick="sendVote()">Send</button>
+      <br>
+      <br>
+      <button type="button" class="close-btn" onclick="close_form()">Close</button>
+    </form>
+
     <form id="form-propose" class="form-propose form" onsubmit="return confirm('Are you sure you want to submit?')" method="POST" enctype="multipart/form-data">
       <input id="csrf_token" type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}"/>
       <h3 class="form-title">Propose An Operation</h3>
@@ -120,6 +143,8 @@
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
   var user_id = {{ user_id | tojson }};
+  var total_found = Number(0), total_issue = Number(0);
+  var collection_amount = [0], burned_list = [];
   user_id.toString();
   var user_abi = {{ user_abi | tojson }};
 
@@ -199,6 +224,26 @@
     }
   }
 
+  function check_proposal_vote(proposalIdx) {
+    const SCS_raw = new ethers.Contract(user_id, user_abi, signer);
+    SCS_raw.checkProposalVote(proposalIdx).then(function(tx) {
+      $("#check-proposal-vote-" + proposalIdx).html("<p class='proposal-vote-accept'>" + parseInt(tx[0]['_hex'], 16) + " / " + parseInt(tx[1]['_hex'], 16) + "</p>  <p class='proposal-vote-reject'>" + parseInt(tx[2]['_hex'], 16) + " / " + parseInt(tx[3]['_hex'], 16) + "</p>");
+    });
+  }
+
+  async function sendVote() {
+    if (confirm("Are You Sure You Want To Send Your Goverance Token?")) {
+      var tx, vote_receiver = $("#send-vote-receiver").val(), vote_amount = $("#send-vote-amount").val();
+      const SCS_raw = new ethers.Contract(user_id, user_abi, signer);
+        signer.getAddress().then(async function(signer_addr) {
+          tx = await SCS_raw.safeTransferFrom(signer_addr, vote_receiver, 0, vote_amount, []);
+          console.log(tx);
+          updateVoteNumber();
+          close_form();
+        });
+    }
+  }
+
   async function setProposal() {
       if(confirm('Are You Sure You Want To Submit?')) {
         var proposal_type = $('#operation').find(":selected").val();
@@ -235,6 +280,25 @@
         location.assign(location.origin + location.pathname + location.search + "&preselect_content=proposal" + location.hash);
       }
     }
+
+  function updateFound() {
+    $("#total-found").html("<b>Found Amount : </b>" + total_found);
+  }
+  
+  function updateIssue() {
+    var total_valid_issue = 0;
+    for (var i = 0; i < burned_list.length; i++) {
+      if (burned_list[i] < collection_amount.length) {
+        total_valid_issue -=  collection_amount[burned_list[i]];
+      } else {
+        $("#total-issue").html("<b>Issue Amount : </b>" + total_issue);
+        console.log("inside");
+      }
+    }
+    total_valid_issue += total_issue;
+    console.log("outside");
+    $("#total-issue").html("<b>Issue Amount : </b>" + total_valid_issue);
+  }
 
   function getEvents() {
     let web3 = new Web3(
@@ -329,26 +393,190 @@
                     }
                     cur_proposal_content_box.append(cur_proposal_header_box);
                     cur_proposal_content_box.append(cur_proposal_content);
+                    $(cur_proposal_content_box).append("<button class='check-proposal-vote' id='check-proposal-vote-" + args["proposalIdx"] + "' onclick='check_proposal_vote(" + args["proposalIdx"] + ")'>Check Votes</button>");
                     cur_proposal.append(cur_proposal_content_box);
                     $(cur_proposal_header_box).append("<button id='reject-btn-" + args["proposalIdx"]+ "' class='reject-btn' onclick='reject_for_proposal(" + args["proposalIdx"]+ ")'>REJECT</button>");
-                    $(cur_proposal_header_box).append("<button id='agree-btn-" + args["proposalIdx"] + "' class='agree-btn' onclick='agree_for_proposal(" + args["proposalIdx"]+ ")'>AGREE</button>");
+                    $(cur_proposal_header_box).append("<button id='agree-btn-" + args["proposalIdx"] + "' class='agree-btn' onclick='agree_for_proposal(" + args["proposalIdx"]+ ")'>ACCEPT</button>");
                     $("#proposal-box").prepend(cur_proposal);
                   } else if (event_name == "ProposalSigned" && curAccount == args["signer"]) {
                     $("#agree-btn-" + args["proposalIdx"]).prop("disabled", true);
+                    $("#reject-btn-" + args["proposalIdx"]).prop("disabled", false);
                   } else if (event_name == "ProposalRejected" && curAccount == args["rejecter"]) {
                     $("#reject-btn-" + args["proposalIdx"]).prop("disabled", true);
-                  } else if (event_name == "ProposalExecuted") {
+                    $("#agree-btn-" + args["proposalIdx"]).prop("disabled", false);
+                  } else if (event_name == "FoundingProposalExecuted" || event_name == "IssueProposalExecuted" || event_name == "BurnProposalExecuted" || event_name == "BurnOneIssueTwoProposalExecuted" || event_name == "GrantVoteProposalExecuted") {
                     $("#proposal-" + args["proposalIdx"]).addClass("passed");
+
+                    if (event_name == "FoundingProposalExecuted") {
+                      let cur_collection = document.createElement("div");
+                      cur_collection.setAttribute("id", "collection-" + args["newItemId"]);
+                      cur_collection.classList.add("collection-item");
+                      let cur_collection_content_box = document.createElement("div");
+                      cur_collection_content_box.classList.add("collection-content-box");
+                      let cur_collection_header_box = document.createElement("div");
+                      cur_collection_header_box.classList.add("collection-header-box");
+                      let cur_collection_title = document.createElement("h3");
+                      $(cur_collection_header_box).append(cur_collection_title)
+                      cur_collection_title.classList.add("collection-title");
+                      cur_collection_title.innerText = "Collection#" + args["newItemId"];
+                      let cur_collection_content = document.createElement("div");
+                      cur_collection_content.classList.add("collection-content");
+                      $(cur_collection_content).append("<p>Proposer : <br><b>" +args["proposer"]+ "</b></p>");
+
+                      fetch(args["certificateTokenURI"])
+                      .then(function(response) {
+                        return response.json();
+                      }).then(function(data) {
+                        res_attr = data["attributes"];
+                        $(cur_collection_content).append("<p>Operation : <br><b>Found</b></p>");
+                        $(cur_collection_content).append("<p>Founded Amount : <br><b>" + res_attr[3]["value"] + "</b></p>");
+                        total_found += Number(res_attr[3]["value"]);
+                        updateFound();
+                        $(cur_collection_content).append("<p>Certificate Name : <br><b>" + data["name"] + "</b></p>");
+                        $(cur_collection_content).append("<img style='max-width: 100px; max-height: 100px;' src='" + data["image"] + "'>")
+                      });
+
+                      cur_collection_content_box.append(cur_collection_header_box);
+                      cur_collection_content_box.append(cur_collection_content);
+                      cur_collection.append(cur_collection_content_box);
+                      $("#collection-box").prepend(cur_collection);
+ 
+                    } else if (event_name == "IssueProposalExecuted") {
+                      let cur_collection = document.createElement("div");
+                      cur_collection.setAttribute("id", "collection-" + args["newItemId"]);
+                      cur_collection.classList.add("collection-item");
+                      let cur_collection_content_box = document.createElement("div");
+                      cur_collection_content_box.classList.add("collection-content-box");
+                      let cur_collection_header_box = document.createElement("div");
+                      cur_collection_header_box.classList.add("collection-header-box");
+                      let cur_collection_title = document.createElement("h3");
+                      $(cur_collection_header_box).append(cur_collection_title)
+                      cur_collection_title.classList.add("collection-title");
+                      cur_collection_title.innerText = "Collection#" + args["newItemId"];
+                      let cur_collection_content = document.createElement("div");
+                      cur_collection_content.classList.add("collection-content");
+                      $(cur_collection_content).append("<p>Proposer : <br><b>" +args["proposer"]+ "</b></p>");
+
+                      fetch(args["certificateTokenURI"])
+                       .then(function(response) {
+                        return response.json();
+                      }).then(function(data) {
+                        res_attr = data["attributes"];
+                        $(cur_collection_content).append("<p>Operation : <br><b>Issue</b></p>");
+                        $(cur_collection_content).append("<p>Issued Amount : <br><b id=\"collection-" + args["newItemId"] + "-issue-amount\" class=\'collection-issue-amount\'>" + res_attr[3]["value"] + "</b></p>");
+                        collection_amount.push(res_attr[3]["value"]);
+                        total_issue += Number(res_attr[3]['value']);
+                        updateIssue();
+                        $(cur_collection_content).append("<p>Certificate Name : <br><b>" + data["name"] + "</b></p>");
+                        $(cur_collection_content).append("<img style='max-width: 100px; max-height: 100px;' src='" + data["image"] + "'>")
+                      });
+
+                      cur_collection_content_box.append(cur_collection_header_box);
+                      cur_collection_content_box.append(cur_collection_content);
+                      cur_collection.append(cur_collection_content_box);
+                      $("#collection-box").prepend(cur_collection);
+                    } else if (event_name == "BurnProposalExecuted") {
+                      burned_list.push(args["tokenId"]);
+                      updateIssue();
+                      $("#collection-" + args["tokenId"]).addClass("burned");
+                    } else if (event_name == "BurnOneIssueTwoProposalExecuted") {
+                      burned_list.push(args["tokenId"]);
+                      updateIssue();
+                      $("#collection-" + args["tokenId"]).addClass("burned");
+                      let cur_collection_1 = document.createElement("div");
+                      cur_collection_1.setAttribute("id", "collection-" + args["newItemId_1"]);
+                      cur_collection_1.classList.add("collection-item");
+                      let cur_collection_1_content_box = document.createElement("div");
+                      cur_collection_1_content_box.classList.add("collection-content-box");
+                      let cur_collection_1_header_box = document.createElement("div");
+                      cur_collection_1_header_box.classList.add("collection-header-box");
+                      let cur_collection_1_title = document.createElement("h3");
+                      $(cur_collection_1_header_box).append(cur_collection_1_title)
+                      cur_collection_1_title.classList.add("collection-title");
+                      cur_collection_1_title.innerText = "Collection#" + args["newItemId_1"];
+                      let cur_collection_1_content = document.createElement("div");
+                      cur_collection_1_content.classList.add("collection-content");
+                      $(cur_collection_1_content).append("<p>Proposer : <br><b>" +args["proposer"]+ "</b></p>");
+
+                      fetch(args["certificateTokenURI_1"])
+                       .then(function(response) {
+                        return response.json();
+                      }).then(function(data) {
+                        res_attr = data["attributes"];
+                        $(cur_collection_1_content).append("<p>Operation : <br><b>Issue</b></p>");
+                        $(cur_collection_1_content).append("<p>Issued Amount : <br><b id=\'collection-" + args["newItemId_1"]+ "-issue-amount\' class=\'collection-issue-amount\'>" + res_attr[3]["value"] + "</b></p>");
+                        total_issue += Number(res_attr[3]['value']);
+                        collection_amount.push(res_attr[3]['value']);
+                        updateIssue();
+                        $(cur_collection_1_content).append("<p>Certificate Name : <br><b>" + data["name"] + "</b></p>");
+                        $(cur_collection_1_content).append("<img style='max-width: 100px; max-height: 100px;' src='" + data["image"] + "'>")
+                      });
+
+                      cur_collection_1_content_box.append(cur_collection_1_header_box);
+                      cur_collection_1_content_box.append(cur_collection_1_content);
+                      cur_collection_1.append(cur_collection_1_content_box);
+                      $("#collection-box").prepend(cur_collection_1);
+
+
+                      let cur_collection_2 = document.createElement("div");
+                      cur_collection_2.setAttribute("id", "collection-" + args["newItemId_2"]);
+                      cur_collection_2.classList.add("collection-item");
+                      let cur_collection_2_content_box = document.createElement("div");
+                      cur_collection_2_content_box.classList.add("collection-content-box");
+                      let cur_collection_2_header_box = document.createElement("div");
+                      cur_collection_2_header_box.classList.add("collection-header-box");
+                      let cur_collection_2_title = document.createElement("h3");
+                      $(cur_collection_2_header_box).append(cur_collection_2_title)
+                      cur_collection_2_title.classList.add("collection-title");
+                      cur_collection_2_title.innerText = "Collection#" + args["newItemId_2"];
+                      let cur_collection_2_content = document.createElement("div");
+                      cur_collection_2_content.classList.add("collection-content");
+                      $(cur_collection_2_content).append("<p>Proposer : <br><b>" +args["proposer"]+ "</b></p>");
+
+                      fetch(args["certificateTokenURI_2"])
+                       .then(function(response) {
+                        return response.json();
+                      }).then(function(data) {
+                        res_attr = data["attributes"];
+                        $(cur_collection_2_content).append("<p>Operation : <br><b>Issue</b></p>");
+                        $(cur_collection_2_content).append("<p>Issued Amount : <br><b id=\'collection-" + args["newItemId_2"] + "-issue-amount\' class=\'collection-issue-amount\'>" + res_attr[3]["value"] + "</b></p>");
+                        total_issue += Number(res_attr[3]['value']);
+                        collection_amount.push(res_attr[3]['value']);
+                        updateIssue();
+                        $(cur_collection_2_content).append("<p>Certificate Name : <br><b>" + data["name"] + "</b></p>");
+                        $(cur_collection_2_content).append("<img style='max-width: 100px; max-height: 100px;' src='" + data["image"] + "'>")
+                      });
+
+                      cur_collection_2_content_box.append(cur_collection_2_header_box);
+                      cur_collection_2_content_box.append(cur_collection_2_content);
+                      cur_collection_2.append(cur_collection_2_content_box);
+                      $("#collection-box").prepend(cur_collection_2);
+                    }
                   } else if (event_name == "ProposalDeprecated") {
                     $("#proposal-" + args["proposalIdx"]).addClass("rejected");
                   }
                 }
             } else {
                 console.log(errors);
-              }
+            }
         }
-    );
-    } 
+      );
+    }
+
+  updateIssue();
+  updateFound();
+  updateVoteNumber();
+
   getEvents();
+
+  async function updateVoteNumber() {
+    const SCS_raw = new ethers.Contract(user_id, user_abi, signer);
+    tx = await SCS_raw.checkVote();
+    let user_vote = parseInt(tx[0]['_hex'], 16), total_vote = parseInt(tx[1]['_hex'], 16);
+    $("#user-vote").html("<div id='vote-number' class='vote-number'><b>Your Vote : </b><p class='my-vote-number'>" + user_vote + "</p> / " + total_vote + "</div>");
+    $("#send-vote-amount").attr({"max": user_vote});
+  }
+
 </script>
 {% endblock %}
+

@@ -94,7 +94,7 @@
   overflow: scroll;
 }
 
-.proposal-box {
+.collection-box, .proposal-box {
   display: flex;
   flex-wrap: wrap;
   flex-direction: row;
@@ -111,7 +111,7 @@
   /* height: 60px; */
 /* } */
 
-.proposal-item {
+.collection-item, .proposal-item {
   width: 350px;
   /* height: 400px; */
   overflow-wrap: break-word;
@@ -119,6 +119,14 @@
   padding: 15px;
   /* padding-right: 30px; */
   border-radius: 15px;
+}
+
+.collection-item {
+  background-color: rgba(0, 100, 250, 0.2);
+}
+
+.collection-item.burned {
+  display: none;
 }
 
 .voting {
@@ -169,7 +177,9 @@
 .passed .proposal-content-box .proposal-header-box .agree-btn,
 .passed .proposal-content-box .proposal-header-box .reject-btn,
 .rejected .proposal-content-box .proposal-header-box .agree-btn,
-.rejected .proposal-content-box .proposal-header-box .reject-btn {
+.rejected .proposal-content-box .proposal-header-box .reject-btn,
+.passed button,
+.rejected button{
   display: none;
 }
 
@@ -206,7 +216,7 @@
   font-size: 1.5em;
 }
 
-.proposal-content-box {
+.collection-content-box, .proposal-content-box {
   padding-left: 10px;
   width: 100%;
 }
@@ -221,7 +231,7 @@
   height: calc((100vh - 110px)/2 - 60px);
 }
 
-.propose-form-item {
+.collection-content-box, .propose-form-item, .send-vote-form-item{
   width: 300px;
   height: 30px;
   margin-bottom: 5px;
@@ -242,8 +252,65 @@
   height: 40px;
 }
 
-.proposal-header-box {
+.collection-header-box, .proposal-header-box {
   display: grid;
   grid-template-columns: auto 75px 80px;
   padding-right: 0;
 }
+
+.my-vote-number {
+  display: inline;
+}
+
+.collection-metadata-wrapper {
+  background-color: rgba(50, 120, 180, 0.8);
+  overflow-y: scroll;
+}
+
+.collection-metadata {
+  display: grid;
+  grid-template-columns: auto 400px 400px;
+  margin: 30px;
+}
+
+.collection-data {
+  font-size: 1.5em;
+}
+
+.user-vote-wrapper {
+  display: flex;
+  gap: 30px;
+  /* grid-template-columns: auto auto; */
+}
+
+.send-vote-btn {
+  margin-top: -10px;
+  font-size: 0.6em;
+  background-color: rgba(50, 100, 255, 0.8);
+  color: white;
+  border-radius: 10px;
+}
+
+.check-proposal-vote {
+  width: 80%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  min-height: 40px;
+  background-color: rgb(80, 90, 110);
+  color: white;
+  border-radius: 10px;
+}
+
+.proposal-vote-accept {
+  color: rgba(50, 190, 50, 1);
+  font-size: 1.5em;
+}
+
+.proposal-vote-reject {
+  /* color: rgba(190, 50, 50, 1); */
+  color: red;
+  font-size: 1.5em;
+}
+
+

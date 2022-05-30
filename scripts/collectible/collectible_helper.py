@@ -4,7 +4,7 @@ from datetime import datetime as dt
 import uuid
 import json
 
-def deploy_collectible(collection_name, collection_symbol, member_account, min_signature, image_path):
+def deploy_collectible(collection_name, collection_symbol, member_account, member_vote, min_signature, image_path):
     def _pin_to_IPFS(filename):
         ipfs_handler_path = './scripts/IPFS/ipfs_handler.js'
         cmd = os.popen(f'node -e \'require("{ipfs_handler_path}").ipfs_pin_file("{filename}")\'')
@@ -39,7 +39,8 @@ def deploy_collectible(collection_name, collection_symbol, member_account, min_s
     certificateTokenURI = f'https://ipfs.io/ipfs/{metadata_hash}'
 
     member_account_str = '|'.join(member_account)
-    cmd = ["brownie", "run", "scripts/collectible/deploy_collectible.py", "main", collection_name, collection_symbol, member_account_str, str(min_signature), certificateTokenURI, "--network", "rinkeby"]
+    member_vote_str = '|'.join(member_vote)
+    cmd = ["brownie", "run", "scripts/collectible/deploy_collectible.py", "main", collection_name, collection_symbol, member_account_str, member_vote_str, str(min_signature), certificateTokenURI, "--network", "rinkeby"]
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     output, error = process.communicate()
     print(output, error)

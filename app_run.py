@@ -45,20 +45,22 @@ def register():
         company_symbol = request.form['company_symbol']
         min_signature = request.form['min_signature']
         member_account = request.form.getlist('member_account')
+        member_vote = request.form.getlist('member_vote')
         image = request.files['image']
         try:
             image_path = f'static/datas/tmp/{str(uuid.uuid4())}.jpg'
             image.save(image_path)
-            output = deploy_collectible(company_name, company_symbol, member_account, min_signature, image_path)
+            output = deploy_collectible(company_name, company_symbol, member_account, member_vote, min_signature, image_path)
             con = sqlite3.connect(app.config['DATABASE'])
             cur = con.cursor()
             new_id = output.decode('utf-8').split('\n')[-3][36:78]
+            print(f'New ID: {new_id}')
             cur.execute("INSERT INTO users (id, name, symbol, collection_url) VALUES (?, ?, ?, ?)", [new_id, company_name, company_symbol, 0])
             con.commit()
             con.close()
             os.mkdir(f'static/datas/{new_id}')
             os.replace(image_path, f'static/datas/{new_id}/logo.jpg')
-            return redirect(url_for('set_collection', company_name=company_name))
+            return redirect(url_for('mainpage'))
         except Exception as e:
             print(e)
  

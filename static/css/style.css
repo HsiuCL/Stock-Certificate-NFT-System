@@ -3,6 +3,10 @@ html, body {
   margin: 0;
 }
 
+::-webkit-scrollbar {
+  display:none;
+}
+
 #footer {
 	background-color: #393e46;
 	text-align: center;
